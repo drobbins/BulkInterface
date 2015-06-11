@@ -1,8 +1,16 @@
 <template name="bulkInterface">
 
-    <textarea name="bulk-interface-value" class="form-control" rows="25"></textarea>
+    
+    <div class="form-group">
+        <textarea name="bulk-interface-value" class="form-control" rows="25"></textarea>
+    </div>
 
-    <p>Parsed into {{count}} rows.</p>
-    <table class="table bulk-interface-table">
-    </table>
+    <div class="row"><div class="col-sm-12">
+        <span class="controls">
+            <button class="btn btn-success parse" role="button">Parse</button>
+        </span>
+    </div></div>
+
+    <table class="table bulk-interface-table"></table>
+
 </template>
