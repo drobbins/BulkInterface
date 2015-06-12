@@ -8,6 +8,9 @@
     <div class="bulk-interface-controls">
         <button class="btn btn-primary parse" role="button">Parse</button>
         <button class="btn btn-default save" role="button" disabled>Save</button>
+        <span class="pull-right">
+            {{#if displayDelimiter}}<span>Delimiter: {{displayDelimiter}}</span>{{/if}}
+        </span>
     </div>
 
     <table class="table bulk-interface-table"></table>

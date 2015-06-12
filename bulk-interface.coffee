@@ -2,6 +2,24 @@ BulkInterface =
     defaultDelimiter: "	" # Tab, copied from Excel
     action: -> console.log BulkInterface.message
     lookupCollection: (name) -> window[name]
+    parse: (rawData, options) ->
+        if options.delimiter
+            parsedData = Papa.parse rawData,
+                header: true
+                delimiter: options.delimiter
+        else
+            # Papa Parse doesn't detect tabs pasted from Excel for some reason, so we have to check for that
+            preview = Papa.parse rawData,
+                header: true
+                preview: 10
+            if (_.any preview.errors, (err) -> err.code == "UndetectableDelimiter")
+                # If the delimiter was not detectable, use the default delimiter
+                parsedData = Papa.parse rawData,
+                    header: true
+                    delimiter: BulkInterface.defaultDelimiter #"\t" "   "
+            else
+                parsedData = Papa.parse rawData, header: true
+        parsedData
 
 if Meteor.isClient
 
@@ -9,6 +27,7 @@ if Meteor.isClient
         # Set up reactive vars for later use
         @data.parsedDataCollection = new Mongo.Collection null
         @data.fields = new ReactiveVar null
+        @data.usedDelimiter = new ReactiveVar null
 
     Template.bulkInterface.events
         "click button.parse": (e, t) ->
@@ -18,19 +37,11 @@ if Meteor.isClient
             t.$("textarea").attr("rows", "5")
 
             # Papa Parse doesn't detect tabs pasted from Excel for some reason, so we have to check for that
-            preview = Papa.parse rawData,
-                header: true
-                preview: 10
-            if (_.any preview.errors, (err) -> err.code == "UndetectableDelimiter")
-                # If the delimiter was not detectable, use the default delimiter
-                parsedData = Papa.parse rawData,
-                    header: true
-                    delimiter: BulkInterface.defaultDelimiter #"\t" "	"
-            else
-                parsedData = Papa.parse rawData, header: true
+            parsedData = BulkInterface.parse rawData, delimiter: @delimiter
 
             # Populate the data object with a few parameters
             @fields.set parsedData.meta.fields
+            @usedDelimiter.set parsedData.meta.delimiter
 
             # Put the parsed rows into a temporary collection
             @parsedDataCollection.remove {}
@@ -58,4 +69,8 @@ if Meteor.isClient
     Template.bulkInterface.helpers
         count: -> @parsedDataCollection.find().count()
         fields: -> @fields.get()
+        displayDelimiter: ->
+            switch @usedDelimiter.get()
+                when "\t", "	" then "tab"
+                else @usedDelimiter.get()
         rows: -> @parsedDataCollection.find()
