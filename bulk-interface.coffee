@@ -1,6 +1,7 @@
 BulkInterface = 
     defaultDelimiter: "	" # Tab, copied from Excel
     action: -> console.log BulkInterface.message
+    lookupCollection: (name) -> window[name]
 
 if Meteor.isClient
 
@@ -11,9 +12,9 @@ if Meteor.isClient
 
     Template.bulkInterface.events
         "click button.parse": (e, t) ->
-            #change textarea[name=bulk-interface-value]
-            rawData = t.$("textarea").val()
 
+            # Get the value of the text area, and shrink it.
+            rawData = t.$("textarea").val()
             t.$("textarea").attr("rows", "5")
 
             # Papa Parse doesn't detect tabs pasted from Excel for some reason, so we have to check for that
@@ -31,16 +32,28 @@ if Meteor.isClient
             # Populate the data object with a few parameters
             @fields.set parsedData.meta.fields
 
+            # Put the parsed rows into a temporary collection
             @parsedDataCollection.remove {}
             parsedData.data.forEach (row) => @parsedDataCollection.insert row
 
+            # Display the parsed data
             $(".bulk-interface-table").dataTable
                 destroy: true
                 data: @parsedDataCollection.find().fetch()
                 columns: @fields.get().map (field) -> data: field, title: field
 
+            # Reflect our success in the buttons
+            t.$("button.parse").removeClass("btn-primary").addClass("btn-success")
+            t.$("button.save").removeClass("btn-default").addClass("btn-primary").attr("disabled", false)
+
         "focus textarea[name=bulk-interface-value]": (e) ->
             $(e.target).attr("rows", "25")
+
+        "click button.save": (e, t) ->
+            collection = BulkInterface.lookupCollection @targetCollection
+            @parsedDataCollection.find().forEach (row) =>
+                collection.insert row
+            t.$("button.save").removeClass("btn-primary").addClass("btn-success")
 
     Template.bulkInterface.helpers
         count: -> @parsedDataCollection.find().count()

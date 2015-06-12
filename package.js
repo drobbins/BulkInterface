@@ -15,7 +15,7 @@ Package.onUse(function(api) {
     api.use(["standard-app-packages", "templating", "blaze", "ui", "reactive-var", "reactive-dict"]);
     api.use("harrison:papa-parse");
     if (api.export) api.export("BulkInterface");
-    api.addFiles(["bulk-interface-templates.html"], "client");
+    api.addFiles(["bulk-interface-templates.html", "bulk-interface.css"], "client");
     api.addFiles(["lib/jquery.dataTables.min.js", "lib/dataTables.bootstrap.css", "lib/dataTables.bootstrap.js"], "client")
     api.addFiles("bulk-interface.coffee");
 });
