@@ -9,7 +9,9 @@
         <button class="btn btn-primary parse" role="button">Parse</button>
         <button class="btn btn-default save" role="button" disabled>Save</button>
         <span class="pull-right">
-            {{#if displayDelimiter}}<span>Delimiter: {{displayDelimiter}}</span>{{/if}}
+            {{#if key}}<span><b>Merge Key:</b> {{key}}</span>{{/if}}
+            {{#if fields}}<span><b>{{#if allowedFields}}Permitted{{/if}} Fields:</b> {{fields}}</span>{{/if}}
+            {{#if displayDelimiter}}<span><b>Delimiter:</b> {{displayDelimiter}}</span>{{/if}}
         </span>
     </div>
 

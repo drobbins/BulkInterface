@@ -1,7 +1,8 @@
 BulkInterface = 
     defaultDelimiter: "	" # Tab, copied from Excel
     action: -> console.log BulkInterface.message
-    lookupCollection: (name) -> window[name]
+    lookupCollection: (name) -> 
+        if Meteor.isClient then window[name] else global[name]
     parse: (rawData, options) ->
         if options.delimiter
             parsedData = Papa.parse rawData,
@@ -21,12 +22,26 @@ BulkInterface =
                 parsedData = Papa.parse rawData, header: true
         parsedData
 
+if Meteor.isServer
+
+    Meteor.methods
+        "bulkInterfaceUpsert": (collectionName, rows, key, fields) ->
+            collection = BulkInterface.lookupCollection collectionName
+            rows.forEach (row) ->
+                rowData =  _.pick(row, fields)
+                if key
+                    selector = {}
+                    selector[key] = row[key]
+                    collection.upsert selector, $set: rowData
+                else
+                    collection.insert rowData
+
 if Meteor.isClient
 
     Template.bulkInterface.onCreated ->
         # Set up reactive vars for later use
         @data.parsedDataCollection = new Mongo.Collection null
-        @data.fields = new ReactiveVar null
+        @data.fields = new ReactiveVar @data.allowedFields?.split(",")
         @data.usedDelimiter = new ReactiveVar null
 
     Template.bulkInterface.events
@@ -40,7 +55,7 @@ if Meteor.isClient
             parsedData = BulkInterface.parse rawData, delimiter: @delimiter
 
             # Populate the data object with a few parameters
-            @fields.set parsedData.meta.fields
+            if not @allowedFields then @fields.set parsedData.meta.fields
             @usedDelimiter.set parsedData.meta.delimiter
 
             # Put the parsed rows into a temporary collection
@@ -61,16 +76,14 @@ if Meteor.isClient
             $(e.target).attr("rows", "25")
 
         "click button.save": (e, t) ->
-            collection = BulkInterface.lookupCollection @targetCollection
-            @parsedDataCollection.find().forEach (row) =>
-                collection.insert row
-            t.$("button.save").removeClass("btn-primary").addClass("btn-success")
+            Meteor.call "bulkInterfaceUpsert", @targetCollection, @parsedDataCollection.find().fetch(), @key, @fields.get(), (err) ->
+                t.$("button.save").removeClass("btn-primary").addClass("btn-success")
 
     Template.bulkInterface.helpers
         count: -> @parsedDataCollection.find().count()
-        fields: -> @fields.get()
+        fields: -> @fields.get()?.join(", ")
         displayDelimiter: ->
             switch @usedDelimiter.get()
-                when "\t", "	" then "tab"
+                when "\t", "    " then "tab"
                 else @usedDelimiter.get()
         rows: -> @parsedDataCollection.find()
