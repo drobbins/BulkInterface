@@ -8,11 +8,25 @@
     <div class="bulk-interface-controls">
         <button class="btn btn-primary parse" role="button">Parse</button>
         <button class="btn btn-default save" role="button" disabled>Save</button>
+        {{#if key}}<span><b>Merge Key:</b> {{key}}</span>{{/if}}
+        {{#if fields}}<span><b>{{#if allowedFields}}Permitted{{/if}} Fields:</b> {{fields}}</span>{{/if}}
+        {{#if displayDelimiter}}<span><b>Delimiter:</b> {{displayDelimiter}}</span>{{/if}}
         <span class="pull-right">
-            {{#if key}}<span><b>Merge Key:</b> {{key}}</span>{{/if}}
-            {{#if fields}}<span><b>{{#if allowedFields}}Permitted{{/if}} Fields:</b> {{fields}}</span>{{/if}}
-            {{#if displayDelimiter}}<span><b>Delimiter:</b> {{displayDelimiter}}</span>{{/if}}
+            <button class="btn btn-default" data-toggle="collapse" data-target="#bulk-interface-legend">Show Legend</button>
         </span>
+    </div>
+
+    <div class="collapse" id="bulk-interface-legend">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Legend</h3>
+            </div>
+            <div class="panel-body">
+                <p>After saving:</p>
+                <p class="bg-success">Green rows have been inserted.</p>
+                <p class="bg-warning">Yellow rows have been updated.</p>
+            </div>
+        </div>
     </div>
 
     <table class="table bulk-interface-table"></table>

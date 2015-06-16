@@ -1,3 +1,7 @@
 div.bulk-interface-controls {
     margin-bottom: 15px;
 }
+
+#bulk-interface-legend p {
+    padding: 15px;
+}
