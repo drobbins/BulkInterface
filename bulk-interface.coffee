@@ -22,19 +22,17 @@ BulkInterface =
                 parsedData = Papa.parse rawData, header: true
         parsedData
 
-if Meteor.isServer
-
-    Meteor.methods
-        "bulkInterfaceUpsert": (collectionName, rows, key, fields) ->
-            collection = BulkInterface.lookupCollection collectionName
-            rows.forEach (row) ->
-                rowData =  _.pick(row, fields)
-                if key
-                    selector = {}
-                    selector[key] = row[key]
-                    collection.upsert selector, $set: rowData
-                else
-                    collection.insert rowData
+Meteor.methods
+    "bulkInterfaceUpsert": (collectionName, rows, key, fields) ->
+        collection = BulkInterface.lookupCollection collectionName
+        rows.forEach (row) ->
+            rowData =  _.pick(row, fields)
+            if key
+                selector = {}
+                selector[key] = row[key]
+                collection.upsert selector, $set: rowData
+            else
+                collection.insert rowData
 
 if Meteor.isClient
 
