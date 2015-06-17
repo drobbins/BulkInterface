@@ -13,7 +13,7 @@ BulkInterface =
             preview = Papa.parse rawData,
                 header: true
                 preview: 10
-            if (_.any preview.errors, (err) -> err.code == "UndetectableDelimiter")
+            if (_.any preview.errors, (err) -> err.code == "UndetectableDelimiter") or (_.any preview.errors, (err) -> err.code == "TooManyFields")
                 # If the delimiter was not detectable, use the default delimiter
                 parsedData = Papa.parse rawData,
                     header: true
@@ -43,6 +43,7 @@ Meteor.methods
 if Meteor.isClient
 
     Template.bulkInterface.onCreated ->
+        if not @data then @data = {}
         # Set up reactive vars for later use
         @data.parsedDataCollection = new Mongo.Collection null
         @data.fields = new ReactiveVar @data.allowedFields?.split(",")
@@ -52,19 +53,21 @@ if Meteor.isClient
         "click button.parse": (e, t) ->
 
             # Get the value of the text area, and shrink it.
-            rawData = t.$("textarea").val()
+            @rawData = t.$("textarea").val()
             t.$("textarea").attr("rows", "5")
+            $(e.target).trigger "BulkInterface.beforeParse"
 
             # Papa Parse doesn't detect tabs pasted from Excel for some reason, so we have to check for that
-            parsedData = BulkInterface.parse rawData, delimiter: @delimiter
+            @parsedData = BulkInterface.parse @rawData, delimiter: @delimiter
+            $(e.target).trigger "BulkInterface.afterParse"
 
             # Populate the data object with a few parameters
-            if not @allowedFields then @fields.set parsedData.meta.fields
-            @usedDelimiter.set parsedData.meta.delimiter
+            if not @allowedFields then @fields.set @parsedData.meta.fields
+            @usedDelimiter.set @parsedData.meta.delimiter
 
             # Put the parsed rows into a temporary collection
             @parsedDataCollection.remove {}
-            parsedData.data.forEach (row) => @parsedDataCollection.insert row
+            @parsedData.data.forEach (row) => @parsedDataCollection.insert row
 
             # Display the parsed data
             $(e.target).trigger "redrawTable"
@@ -77,9 +80,11 @@ if Meteor.isClient
             $(e.target).attr("rows", "25")
 
         "click button.save": (e, t) ->
+            $(e.target).trigger "BulkInterface.beforeSave"
             Meteor.call "bulkInterfaceUpsert", @targetCollection, @parsedDataCollection.find().fetch(), @key, @fields.get(), (err, results) =>
                 results?.forEach (result) =>
                     @parsedDataCollection.update result._id, $set: _status: result.status
+                $(e.target).trigger "BulkInterface.afterSave"
                 $(e.target).trigger "redrawTable"
                 t.$("button.save").removeClass("btn-primary").addClass("btn-success")
 
@@ -96,6 +101,12 @@ if Meteor.isClient
                         when "error" then "danger"
                         else ""
                     $(row).addClass rowClass
+
+        "BulkInterface.beforeParse": -> @beforeParse?.apply? @, arguments
+        "BulkInterface.afterParse": -> @afterParse?.apply? @, arguments
+        "BulkInterface.beforeSave": -> @beforeSave?.apply? @, arguments
+        "BulkInterface.afterSave": -> @afterSave?.apply? @, arguments
+
 
     Template.bulkInterface.helpers
         count: -> @parsedDataCollection.find().count()
