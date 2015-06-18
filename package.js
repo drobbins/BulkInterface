@@ -11,7 +11,7 @@ Package.describe({
 
 Package.onUse(function(api) {
     api.versionsFrom("1.1.0.2");
-    api.use("coffeescript"),
+    api.use("coffeescript");
     api.use(["standard-app-packages", "templating", "blaze", "ui", "reactive-var", "reactive-dict"]);
     api.use("harrison:papa-parse");
     if (api.export) api.export("BulkInterface");
@@ -22,6 +22,7 @@ Package.onUse(function(api) {
 
 Package.onTest(function(api) {
     api.use("tinytest");
+    api.use("coffeescript"),
     api.use("robbinsd:bulk-interface");
-    api.addFiles("bulk-interface-tests.js");
+    api.addFiles("bulk-interface-tests.coffee");
 });
