@@ -3,7 +3,7 @@ Package.describe({
     version: "0.0.1",
     summary: "Create bulk-interface forms for quickly importing/exporting *SV data.",
     // URL to the Git repository containing the source code for this package.
-    git: "",
+    git: "https://github.com/drobbins/BulkInterface.git",
     // By default, Meteor will default to using README.md for documentation.
     // To avoid submitting documentation, set this field to null.
     documentation: "README.md"
