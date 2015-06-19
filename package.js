@@ -8,11 +8,33 @@ Package.describe({
 
 Package.onUse(function(api) {
     api.versionsFrom("1.1.0.2");
-    api.use("coffeescript");
-    api.use(["standard-app-packages", "templating", "blaze", "ui", "reactive-var", "reactive-dict"]);
+
+    // Dependencies
+    api.use([
+        "standard-app-packages", // Contents: http://www.meteorpedia.com/read/standard-app-packages
+        "blaze",
+        "ui",
+        "reactive-var",
+        "reactive-dict",
+        "coffeescript"
+    ]);
     api.use("harrison:papa-parse@1.1.0");
-    if (api.export) api.export("BulkInterface");
-    api.addFiles(["bulk-interface-templates.html", "bulk-interface.css"], "client");
-    api.addFiles(["lib/jquery.dataTables.min.js", "lib/dataTables.bootstrap.css", "lib/dataTables.bootstrap.js"], "client")
-    api.addFiles("bulk-interface.coffee");
+    
+    api.export("BulkInterface");
+
+    // Common Files
+    api.addFiles("common.coffee");
+
+    // Server-only Files
+    api.addFiles("server/bulk-interface.coffee", "server");
+
+    // Client-only Files
+    api.addFiles([
+        "client/lib/jquery.dataTables.min.js",
+        "client/lib/dataTables.bootstrap.css",
+        "client/lib/dataTables.bootstrap.js",
+        "client/bulk-interface-templates.html",
+        "client/bulk-interface.css",
+        "client/bulk-interface.coffee"
+    ], "client");   
 });
