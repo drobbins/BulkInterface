@@ -26,7 +26,7 @@ Package.onUse(function(api) {
     api.addFiles("common.coffee");
 
     // Server-only Files
-    api.addFiles("server/bulk-interface.coffee", "server");
+    // api.addFiles("server/bulk-interface.coffee", "server");
 
     // Client-only Files
     api.addFiles([
