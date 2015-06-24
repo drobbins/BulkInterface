@@ -6,6 +6,9 @@ Template.bulkInterface.onCreated ->
     @data.fields = new ReactiveVar @data.interface.allowedFields?.split(",")
     @data.usedDelimiter = new ReactiveVar null
 
+Template.bulkInterface.onDestroyed -> @data.table.api().destroy();
+
+
 Template.bulkInterface.events
     "click button.parse": (e, t) ->
 
@@ -46,7 +49,7 @@ Template.bulkInterface.events
 
     "redrawTable": ->
         # Display the parsed data
-        $(".bulk-interface-table").dataTable
+        @table = $(".bulk-interface-table").dataTable
             destroy: true
             data: @parsedDataCollection.find().fetch()
             columns: @fields.get().map (field) -> data: field, title: field
