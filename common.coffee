@@ -76,7 +76,7 @@ Meteor.methods
                 status:
                     type: type
                     rawResponse: response
-            if key then result.key = row[key]
+            if key then result.key = row[key].trim()
             return result
 
 
@@ -89,7 +89,7 @@ Meteor.methods
 
                 if key
                     selector = {}
-                    selector[key] = row[key]
+                    selector[key] = row[key].trim()
                     response = _interface.collection.upsert selector, $set: rowData
                     results.push makeResult row, response
                 else
