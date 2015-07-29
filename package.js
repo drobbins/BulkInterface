@@ -1,6 +1,6 @@
 Package.describe({
     name: "robbinsd:bulk-interface",
-    version: "0.0.2",
+    version: "0.0.3",
     summary: "Create bulk-interface forms for quickly importing/exporting *SV data.",
     git: "https://github.com/drobbins/BulkInterface.git",
     documentation: "README.md"
